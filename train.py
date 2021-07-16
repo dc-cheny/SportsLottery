@@ -10,9 +10,9 @@ class superLotteryData(Dataset):
     def __init__(self, d_path, col_num, window_size, is_train=True):
         """Initialization"""
         if is_train:
-            df = pd.read_excel(d_path, engine='openpyxl')[100:]
+            df = pd.read_excel(d_path, engine='openpyxl')[200:]
         else:
-            df = pd.read_excel(d_path, engine='openpyxl')[:100]
+            df = pd.read_excel(d_path, engine='openpyxl')[:200]
         self.data = []
         self.window_size = window_size
         self.col_num = col_num
