@@ -189,3 +189,14 @@ class BaseModel:
         self.save_model(model.load_state_dict(best_model_wts),
                         save_path='results/{}/210716_best.pth'.format(self.model_name))
         return model, val_acc_history
+
+    def predict(self,
+                weights,
+                inputs,
+                device=torch.device("cuda:0" if torch.cuda.is_available() else "cpu")):
+        model = torch.load(weights)
+        model = model.to(device)
+        inputs = inputs.to(device)
+        with torch.no_grad():
+            results = model(inputs)
+        return results

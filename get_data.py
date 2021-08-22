@@ -97,11 +97,75 @@ class SuperLottery:
         return
 
 
+class ThreeD:
+    def __init__(self):
+        self.SAVE_DIR = 'data/threeD'
+        self.SAVE_FILE_NAME = 'threeD.xlsx'
+        self.build_directory()
+        self.build_logger()
+        # self.start_page = 1
+        # self.end_page = 28
+
+    def build_logger(self):
+        logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+        self.logger = logging.getLogger(__name__)
+        self.logger.info("Building logger...")
+        return
+
+    def build_directory(self):
+        if not os.path.exists(self.SAVE_DIR):
+            os.mkdir(self.SAVE_DIR)
+        if not os.path.exists(os.path.join(self.SAVE_DIR, 'partitions')):
+            os.mkdir(os.path.join(self.SAVE_DIR, 'partitions'))
+        return
+
+    def request_txt(self, url):
+        r = requests.get(url)
+        return r.text
+
+    def parse_json(self, txt):
+        return json.loads(txt)
+
+    def get_soup_from_txt(self, txt_path):
+        with open(txt_path, 'r') as f:
+            r = f.readlines()
+        r = ''.join(r)
+        return BeautifulSoup(r, 'lxml')
+
+    def history_fun(self, txt_path):
+        soup = self.get_soup_from_txt(txt_path)
+        css = 'tbody > tr'
+        rows_content = soup.select(css)
+        rows = []
+        columns = ['num', 'result', 'sum', 'zhixuan_num', 'zuxuan3_num', 'zuxuan6_num',
+                   'row_date']
+
+        for row in tqdm(rows_content[2:]):
+            row_soup = row.select('td')
+            row_num = row_soup[0].text
+            row_result = row_soup[1].text
+            row_sum = row_soup[2].text
+            row_zhixuan_num = row_soup[4].text
+            row_zuxuan3_num = row_soup[6].text
+            row_zuxuan6_num = row_soup[8].text
+            row_date = row_soup[10].text
+            rows.append([row_num, row_result, row_sum, row_zhixuan_num, row_zuxuan3_num,
+                         row_zuxuan6_num, row_date])
+            # curr_df = pd.DataFrame(rows, columns=columns)
+        df = pd.DataFrame(rows, columns=columns)
+
+        self.logger.info('Finishing...')
+        df.to_excel(os.path.join(self.SAVE_DIR, 'threeDTotal.xlsx'))
+        return
+
+
 def main():
-    sl = SuperLottery()
+    # sl = SuperLottery()
     # sl.fun()
     # sl.combine_partitions()
-    sl.history_fun()
+    # sl.history_fun()
+    td = ThreeD()
+    td.history_fun('./data/threeD/tbody.txt')
 
 
 if __name__ == '__main__':
